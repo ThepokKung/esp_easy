@@ -1,0 +1,28 @@
+void reconnect_mqtt() { //Reconnect for MQTT or Wifi in ESP Down it is reconnect now
+  while (!mqtt.connected()) {
+    unsigned long currentMillis = millis();
+    unsigned long previousMillis = 0;
+    unsigned long interval = 30000;
+    // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
+    if ((WiFi.status() != WL_CONNECTED) && (currentMillis - previousMillis >= interval)) {
+      Serial.print(millis());
+      Serial.println("Reconnecting to WiFi...");
+      WiFi.disconnect();
+      WiFi.reconnect();
+      previousMillis = currentMillis;
+    }
+    Serial.print("Attempting MQTT connection...");
+    //WiFi.reconnect();
+    if (mqtt.connect(mqtt_name_id, mqttUser, mqttPassword)) {
+      Serial.println("connected");
+      // Subscribe or resubscribe to a topic
+      // You can subscribe to more topics (to control more LEDs in this example)
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(mqtt.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
